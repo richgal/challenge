@@ -2,6 +2,9 @@ defmodule CheckoutFunctions do
   @moduledoc """
   Functions for supporting the Checkout module.
 
+  * initializing unique cart
+  * manage item additions
+
   """
 
   @typedoc """
