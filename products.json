@@ -1,0 +1,5 @@
+[
+  { "Code": "VOUCHER", "Name": "Voucher", "Price": "5.00€" },
+  { "Code": "TSHIRT", "Name": "T-Shirt", "Price": "20.00€" },
+  { "Code": "MUG", "Name": "Coffee Mug", "Price": "7.50€" }
+]
