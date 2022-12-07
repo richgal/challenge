@@ -27,9 +27,9 @@ defmodule PricingRules do
 
   def pricing_rule_2_for_1(checkout_cart, product_code) do
     {_code, _name, price, quantity, _ccy} =
-      CheckoutFunctions.get_cart_element_attributes(checkout_cart, product_code)
+      CheckoutFunctions.get_checkout_cart_element_attributes(checkout_cart, product_code)
 
-    cart_element = CheckoutFunctions.get_cart_element(checkout_cart, product_code)
+    cart_element = CheckoutFunctions.get_checkout_cart_element(checkout_cart, product_code)
 
     checkout_cart =
       cond do
@@ -64,9 +64,9 @@ defmodule PricingRules do
 
   def pricing_rule_bulk_purchase(checkout_cart, product_code, bulk_limit, new_price) do
     {_code, _name, _price, quantity, _ccy} =
-      CheckoutFunctions.get_cart_element_attributes(checkout_cart, product_code)
+      CheckoutFunctions.get_checkout_cart_element_attributes(checkout_cart, product_code)
 
-    cart_element = CheckoutFunctions.get_cart_element(checkout_cart, product_code)
+    cart_element = CheckoutFunctions.get_checkout_cart_element(checkout_cart, product_code)
 
     checkout_cart =
       cond do

@@ -8,6 +8,7 @@ defmodule Challenge.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      Checkout
       # Starts a worker by calling: Challenge.Worker.start_link(arg)
       # {Challenge.Worker, arg}
     ]

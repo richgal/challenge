@@ -19,6 +19,7 @@ defmodule CheckoutFunctions do
    product_code e.g. -> "TSHIRT"
   """
   @type product_code() :: String.t()
+  @type cart_id() :: String.t()
   @typedoc """
    subtotal e.g. -> %{"Bar" => 2, "Foo" => 3, "Subtotal" => 0}
   """
@@ -39,15 +40,33 @@ defmodule CheckoutFunctions do
   @type product_list_summary() :: map()
   @type pricing_rule() :: atom()
 
-  @spec generate_new_cart(pricing_rule()) :: cart()
+  @spec generate_new_cart(pricing_rule()) :: cart_id()
   def generate_new_cart(pricing_rule) do
-    %{cart_id: UUID.uuid4(), product_list: [], pricing_rule: pricing_rule}
+    cart = %{cart_id: UUID.uuid4(), product_list: [], pricing_rule: pricing_rule}
+    cart_id = Checkout.call({:new_cart, cart})
+    cart_id
   end
 
-  @spec add_product_to_cart(cart(), product_code()) :: cart()
+  @spec add_product_to_cart(cart(), product_code()) :: :ok
   def add_product_to_cart(cart, product_code) do
     new_produt_list = [product_code | cart.product_list]
-    %{cart | product_list: new_produt_list}
+    Checkout.call({:update_checkout_state, %{cart | product_list: new_produt_list}})
+  end
+
+  def get_cart_from_checkout_state(cart_id, checkout_state) do
+    cart = Enum.find(checkout_state, fn x -> x.cart_id == cart_id end)
+    cart
+  end
+
+  def update_checkout_state(cart, checkout_state) do
+    cart_id = cart.cart_id
+
+    checkout_state_update =
+      checkout_state
+      |> Enum.reject(fn x -> x.cart_id == cart_id end)
+      |> List.insert_at(-1, cart)
+
+    checkout_state_update
   end
 
   @spec summarise_product_list(product_list()) :: product_list_summary()
@@ -102,7 +121,7 @@ defmodule CheckoutFunctions do
     checkout_cart_update
   end
 
-  def get_cart_element_attributes(checkout_cart, product_code) do
+  def get_checkout_cart_element_attributes(checkout_cart, product_code) do
     cart_element = Enum.find(checkout_cart, fn x -> x["Code"] == product_code end)
 
     case cart_element do
@@ -115,7 +134,7 @@ defmodule CheckoutFunctions do
     end
   end
 
-  def get_cart_element(checkout_cart, product_code) do
+  def get_checkout_cart_element(checkout_cart, product_code) do
     Enum.find(checkout_cart, fn x -> x["Code"] == product_code end)
   end
 end
