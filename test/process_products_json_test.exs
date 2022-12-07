@@ -8,11 +8,7 @@ defmodule ProcessProductsJsonTest do
     assert {:error, :file_not_exist} == PPJS.json_to_list("./", "non-exitent.json")
 
     # file read correctly
-    result = [
-      %{"Code" => "VOUCHER", "Name" => "Voucher", "Price" => "5.00€"},
-      %{"Code" => "TSHIRT", "Name" => "T-Shirt", "Price" => "20.00€"},
-      %{"Code" => "MUG", "Name" => "Coffee Mug", "Price" => "7.50€"}
-    ]
+    result = raw_list()
 
     assert result == PPJS.json_to_list("./test/", "products_test.json")
   end
@@ -25,18 +21,31 @@ defmodule ProcessProductsJsonTest do
   end
 
   test "separate_currency_on_product_list function tests" do
-    raw_list = [
-      %{"Code" => "VOUCHER", "Name" => "Voucher", "Price" => "5.00€"},
-      %{"Code" => "TSHIRT", "Name" => "T-Shirt", "Price" => "20.00€"},
-      %{"Code" => "MUG", "Name" => "Coffee Mug", "Price" => "7.50€"}
-    ]
+    raw_list = raw_list()
+    processed_list = processed_list()
+    assert processed_list == PPJS.separate_currency_on_product_list(raw_list)
+  end
 
-    processed_list = [
+  test "get_product_list test" do
+    processed_list = processed_list()
+    assert processed_list == PPJS.get_product_list("./test/", "products_test.json")
+  end
+
+  # Util funtions
+
+  def processed_list do
+    [
       %{"Code" => "VOUCHER", "Name" => "Voucher", "Price" => 5.0, "ccy" => "€"},
       %{"Code" => "TSHIRT", "Name" => "T-Shirt", "Price" => 20.0, "ccy" => "€"},
       %{"Code" => "MUG", "Name" => "Coffee Mug", "Price" => 7.5, "ccy" => "€"}
     ]
+  end
 
-    assert processed_list == PPJS.separate_currency_on_product_list(raw_list)
+  def raw_list do
+    [
+      %{"Code" => "VOUCHER", "Name" => "Voucher", "Price" => "5.00€"},
+      %{"Code" => "TSHIRT", "Name" => "T-Shirt", "Price" => "20.00€"},
+      %{"Code" => "MUG", "Name" => "Coffee Mug", "Price" => "7.50€"}
+    ]
   end
 end
