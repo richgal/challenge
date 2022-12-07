@@ -34,6 +34,8 @@ defmodule CheckoutFunctions do
     ]
   """
   @type store_product_list() :: nonempty_list()
+  @type product_list() :: list()
+  @type product_list_summary() :: map()
 
   @spec generate_new_cart() :: cart()
   def generate_new_cart do
@@ -46,11 +48,10 @@ defmodule CheckoutFunctions do
     %{cart | product_list: new_produt_list}
   end
 
-  @spec summarise_product_list(cart()) :: cart_summary()
-  def summarise_product_list(cart) do
-    cart_summary = Enum.frequencies(cart.product_list)
-    # here add prices and currencies
-    cart_summary
+  @spec summarise_product_list(product_list()) :: product_list_summary()
+  def summarise_product_list(product_list) do
+    product_list_summary = Enum.frequencies(product_list)
+    product_list_summary
   end
 
   @spec generate_subtotal(cart_summary()) :: subtotal()
