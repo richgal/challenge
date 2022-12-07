@@ -49,12 +49,13 @@ defmodule CheckoutFunctions do
   @spec summarise_product_list(cart()) :: cart_summary()
   def summarise_product_list(cart) do
     cart_summary = Enum.frequencies(cart.product_list)
+    # here add prices and currencies
     cart_summary
   end
 
   @spec generate_subtotal(cart_summary()) :: subtotal()
   def generate_subtotal(cart_summary) do
-    Map.merge(cart_summary, %{"Subtotal" => 0})
+    %{"cart_summary" => cart_summary, "Subtotal" => 0}
   end
 
   @spec get_product_quantity(subtotal(), product_code()) :: integer()
