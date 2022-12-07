@@ -2,6 +2,10 @@ defmodule PricingRules do
   @moduledoc """
   Module to implement individual pricing rules. The pricing rules could be used exclusively by adding the selected functions
   to price rule sets in the PricingRulesSets module.
+
+  With the help of unique pricing rules it is possible to implement conventional or exotic pricing rule funtions.
+
+  Each pricing rule input should be a subtotal() map and should return an updated subtotal map()
   """
   alias ProcessProductsJson
   alias CheckoutFunctions
