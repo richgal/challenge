@@ -33,13 +33,15 @@ defmodule CheckoutFunctions do
       %{"Code" => "MUG", "Name" => "Coffee Mug", "Price" => 7.5, "ccy" => "€"}
     ]
   """
+  @type checkout_cart() :: list()
   @type store_product_list() :: nonempty_list()
   @type product_list() :: list()
   @type product_list_summary() :: map()
+  @type pricing_rule() :: atom()
 
-  @spec generate_new_cart() :: cart()
-  def generate_new_cart do
-    %{cart_id: UUID.uuid4(), product_list: []}
+  @spec generate_new_cart(pricing_rule()) :: cart()
+  def generate_new_cart(pricing_rule) do
+    %{cart_id: UUID.uuid4(), product_list: [], pricing_rule: pricing_rule}
   end
 
   @spec add_product_to_cart(cart(), product_code()) :: cart()
@@ -54,29 +56,66 @@ defmodule CheckoutFunctions do
     product_list_summary
   end
 
-  @spec generate_subtotal(cart_summary()) :: subtotal()
-  def generate_subtotal(cart_summary) do
-    %{"cart_summary" => cart_summary, "Subtotal" => 0}
+  @spec generate_checkout_cart(product_list_summary(), store_product_list()) :: checkout_cart()
+  def generate_checkout_cart(product_list_summary, store_product_list) do
+    checkout_cart =
+      Map.keys(product_list_summary)
+      |> Enum.map(fn x ->
+        generate_checkout_cart_element(x, product_list_summary, store_product_list)
+      end)
+
+    checkout_cart
   end
 
-  @spec get_product_quantity(subtotal(), product_code()) :: integer()
-  def get_product_quantity(subtotal, product_code) do
-    quantity =
-      case Map.has_key?(subtotal, product_code) do
-        true -> subtotal[product_code]
-        false -> 0
-      end
+  @spec generate_checkout_cart_element(
+          product_code(),
+          product_list_summary(),
+          store_product_list()
+        ) :: map()
+  def generate_checkout_cart_element(product_code, product_list_summary, store_product_list) do
+    cart_element =
+      Enum.find(store_product_list, fn x -> x["Code"] == product_code end)
+      |> Map.put("Quantity", product_list_summary[product_code])
 
-    quantity
+    cart_element
   end
 
-  @spec get_product_price(product_code(), store_product_list()) :: float()
-  def get_product_price(product_code, store_product_list) do
-    product_price =
-      store_product_list
-      |> Enum.find(fn x -> x["Code"] == product_code end)
-      |> Map.get("Price")
+  def update_checkout_cart(checkout_cart, cart_element) when is_map(cart_element) do
+    product_code = cart_element["Code"]
 
-    product_price
+    checkout_cart_update =
+      checkout_cart
+      |> Enum.reject(fn x -> x["Code"] == product_code end)
+      |> List.insert_at(-1, cart_element)
+
+    checkout_cart_update
+  end
+
+  def update_checkout_cart(checkout_cart, cart_element) when is_list(cart_element) do
+    product_code = hd(cart_element)["Code"]
+
+    checkout_cart_update =
+      checkout_cart
+      |> Enum.reject(fn x -> x["Code"] == product_code end)
+      |> Kernel.++(cart_element)
+
+    checkout_cart_update
+  end
+
+  def get_cart_element_attributes(checkout_cart, product_code) do
+    cart_element = Enum.find(checkout_cart, fn x -> x["Code"] == product_code end)
+
+    case cart_element do
+      nil ->
+        {"not_in_cart", "not_in_cart", 0, 0, nil}
+
+      _ ->
+        {cart_element["Code"], cart_element["Name"], cart_element["Price"],
+         cart_element["Quantity"], cart_element["ccy"]}
+    end
+  end
+
+  def get_cart_element(checkout_cart, product_code) do
+    Enum.find(checkout_cart, fn x -> x["Code"] == product_code end)
   end
 end
