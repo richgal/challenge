@@ -25,29 +25,35 @@ defmodule PricingRules do
    store_product_list = []
   """
 
-  def pricing_rule_2_for_1(subtotal, product_code, store_product_list) do
-    quantity = CheckoutFunctions.get_product_quantity(subtotal, product_code)
-    price = CheckoutFunctions.get_product_price(product_code, store_product_list)
+  def pricing_rule_2_for_1(checkout_cart, product_code) do
+    {_code, _name, price, quantity, _ccy} =
+      CheckoutFunctions.get_cart_element_attributes(checkout_cart, product_code)
 
-    product_subtotal =
+    cart_element = CheckoutFunctions.get_cart_element(checkout_cart, product_code)
+
+    checkout_cart =
       cond do
-        quantity == 0 ->
-          0
+        quantity < 2 ->
+          checkout_cart
 
-        quantity == 1 ->
-          price
-
-        quantity == 2 ->
-          2 * price * 0.5
-
-        quantity > 2 ->
+        quantity >= 2 ->
           case rem(quantity, 2) do
-            0 -> quantity * price * 0.5
-            _ -> (quantity - 1) * price * 0.5 + price
+            0 ->
+              CheckoutFunctions.update_checkout_cart(checkout_cart, %{
+                cart_element
+                | "Price" => price * 0.5
+              })
+
+            _ ->
+              CheckoutFunctions.update_checkout_cart(checkout_cart, [
+                %{cart_element | "Price" => price * 0.5, "Quantity" => quantity - 1},
+                %{cart_element | "Quantity" => 1}
+              ])
           end
       end
 
-    product_subtotal
+    IO.puts("checkout_cart #{inspect(checkout_cart)}")
+    checkout_cart
   end
 
   @doc """
@@ -56,30 +62,25 @@ defmodule PricingRules do
    if you buy 3 or more `TSHIRT` items, the price per unit should be 19.00€.
   """
 
-  def pricing_rule_bulk_purchase(subtotal, product_code, store_product_list) do
-    quantity = CheckoutFunctions.get_product_quantity(subtotal, product_code)
-    price = CheckoutFunctions.get_product_price(product_code, store_product_list)
+  def pricing_rule_bulk_purchase(checkout_cart, product_code, bulk_limit, new_price) do
+    {_code, _name, _price, quantity, _ccy} =
+      CheckoutFunctions.get_cart_element_attributes(checkout_cart, product_code)
 
-    product_subtotal =
+    cart_element = CheckoutFunctions.get_cart_element(checkout_cart, product_code)
+
+    checkout_cart =
       cond do
-        quantity == 0 -> 0
-        quantity < 3 -> quantity * price
-        quantity >= 3 -> quantity * 19.00
+        quantity < bulk_limit ->
+          checkout_cart
+
+        quantity >= bulk_limit ->
+          CheckoutFunctions.update_checkout_cart(checkout_cart, %{
+            cart_element
+            | "Price" => new_price
+          })
       end
 
-    product_subtotal
-  end
-
-  def pricing_rule_reqular_purchase(subtotal, product_code, store_product_list) do
-    quantity = CheckoutFunctions.get_product_quantity(subtotal, product_code)
-    price = CheckoutFunctions.get_product_price(product_code, store_product_list)
-
-    product_subtotal =
-      cond do
-        quantity == 0 -> 0
-        quantity > 0 -> quantity * price
-      end
-
-    product_subtotal
+    IO.puts("checkout_cart #{inspect(checkout_cart)}")
+    checkout_cart
   end
 end
