@@ -4,7 +4,7 @@ defmodule CheckoutFunctionsTest do
   doctest CheckoutFunctions
 
   test "generate new cart tests" do
-    cart = CheckoutFunctions.generate_new_cart()
+    cart = CheckoutFunctions.generate_new_cart(:pricing_rule)
     assert 36 == String.length(cart.cart_id)
     assert [] == cart.product_list
   end
