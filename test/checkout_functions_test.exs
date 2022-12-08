@@ -15,7 +15,9 @@ defmodule CheckoutFunctionsTest do
     assert [] == cart.product_list
 
     # add item to cart
-    cart_after_item_added = CheckoutFunctions.add_product_to_cart(cart, "TSHIRT", %{"TSHIRT" => 1, "MUG" => 2})
+    cart_after_item_added =
+      CheckoutFunctions.add_product_to_cart(cart, "TSHIRT", %{"TSHIRT" => 1, "MUG" => 2})
+
     assert "TSHIRT" == hd(cart_after_item_added.product_list)
     assert cart.cart_id == cart_after_item_added.cart_id
   end

@@ -16,14 +16,14 @@ defmodule PricingRulesSets do
   def pricing_rule_set_registry do
     %{
       pricing_rule: &unique_ricing_rule_set/1,
-      no_discout:  &no_discount/1
+      no_discout: &no_discount/1
     }
   end
 
   def unique_ricing_rule_set(checkout_cart) do
     checkout_cart
     |> PricingRules.pricing_rule_2_for_1("VOUCHER")
-    |> PricingRules.pricing_rule_bulk_purchase("TSHIRT", 3, 19)
+    |> PricingRules.pricing_rule_bulk_purchase("TSHIRT", 3, 19.00)
     |> calculate_total("€")
   end
 
@@ -34,10 +34,10 @@ defmodule PricingRulesSets do
 
   def calculate_total(checkout_cart, ccy) do
     total =
-    checkout_cart
-    |> Enum.map(fn x -> x["Quantity"] * x["Price"] end)
-    |> Enum.reduce(fn x, acc -> x + acc end)
+      checkout_cart
+      |> Enum.map(fn x -> x["Quantity"] * x["Price"] end)
+      |> Enum.reduce(fn x, acc -> x + acc end)
 
-    "#{total}#{ccy}"
+    "#{:erlang.float_to_binary(total, decimals: 2)}#{ccy}"
   end
 end

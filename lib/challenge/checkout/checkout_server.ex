@@ -3,7 +3,7 @@ defmodule CheckoutServer do
   This module implements a GenServer to keep the state individual checkout processes
   related carts (with product lists and pricing rules).
 
-  The state of the CheckoutServer will be updated once +
+  The state of the CheckoutServer will be updated once
   * new cart is created
   * new item is added to specific cart
   * unique cart will be removed from the ChekcoutServer state once checout process is completed
@@ -40,8 +40,18 @@ defmodule CheckoutServer do
     {:reply, cart, state}
   end
 
-  def handle_call({:checkout, cart}, _from, state) do
-    new_state = [cart | state]
-    {:reply, state, new_state}
+  def handle_call({:delete_cart, cart_id}, _from, state) do
+    CheckoutFunctions.remove_cart_from_checkout_server_state(cart_id, state)
+    {:reply, :ok, state}
+  end
+
+  @impl true
+  def handle_info({:EXIT, _from, reason}, state) do
+    {:stop, reason, state}
+  end
+
+  @impl true
+  def terminate(_reason, _state) do
+    IO.puts("Cleanup funtion not set, but ready to be set")
   end
 end

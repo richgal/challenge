@@ -1,11 +1,6 @@
 process_json = ProcessProductsJson
 store_product_list = ProcessProductsJson.get_product_list("./", "products.json")
-cart_list1 = ["VOUCHER", "TSHIRT", "VOUCHER", "VOUCHER", "MUG", "TSHIRT", "TSHIRT"]
-pls1 = CheckoutFunctions.summarise_product_list(cart_list1)
-cart_list2 = ["TSHIRT", "TSHIRT", "TSHIRT", "VOUCHER", "TSHIRT"]
-pls2 = CheckoutFunctions.summarise_product_list(cart_list2)
-cart_list3 = ["VOUCHER", "TSHIRT", "VOUCHER"]
-pls3 = CheckoutFunctions.summarise_product_list(cart_list3)
-cart_list4 = ["VOUCHER", "TSHIRT", "MUG"]
-pls4 = CheckoutFunctions.summarise_product_list(cart_list4)
-checkout_cart =  &CheckoutFunctions.generate_checkout_cart/2
+cart_list = ["VOUCHER", "TSHIRT", "VOUCHER", "VOUCHER", "MUG", "TSHIRT", "TSHIRT"]
+pls = PricingRulesCheckoutCart.summarise_product_list(cart_list)
+ccart = PricingRulesCheckoutCart.generate_checkout_cart(pls, store_product_list)
+registry = PricingRulesSets.pricing_rule_set_registry()
