@@ -62,8 +62,8 @@ def unique_ricing_rule_set(checkout_cart) do
   end
 ```
 
-1. The pricing rule sets must end with a `calculate_total/2` function call. 
-2. Once the pricing rule set is ready it must registered in the `pricing_rule_set_registry/0` funtcion. 
+3. The pricing rule sets must end with a `calculate_total/2` function call. 
+4. Once the pricing rule set is ready it must registered in the `pricing_rule_set_registry/0` funtcion. 
 
 ```elixir
 def pricing_rule_set_registry do
@@ -74,7 +74,7 @@ def pricing_rule_set_registry do
   end
 ```
 
-1. A registered pricing rule set can be used as argument when calling `Checkout.new/1`. 
+5. A registered pricing rule set can be used as argument when calling `Checkout.new/1`. 
 
 ### Test
 
