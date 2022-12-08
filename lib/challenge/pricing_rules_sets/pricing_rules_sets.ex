@@ -13,12 +13,19 @@ defmodule PricingRulesSets do
 
   """
 
+  # checkout_cart() e.g. -> [cart_element(), cart_element()]
+  @type checkout_cart() :: list()
+  # ccy() e.g. -> "€"
+  @type ccy() :: String.t()
+
   def pricing_rule_set_registry do
     %{
       pricing_rule: &unique_ricing_rule_set/1,
       no_discout: &no_discount/1
     }
   end
+
+  # unique pricing rules
 
   def unique_ricing_rule_set(checkout_cart) do
     checkout_cart
@@ -31,6 +38,8 @@ defmodule PricingRulesSets do
     checkout_cart
     |> calculate_total("€")
   end
+
+  # calculate total must be the final invoked funcion in unique pricing rule funtions
 
   def calculate_total(checkout_cart, ccy) do
     total =
