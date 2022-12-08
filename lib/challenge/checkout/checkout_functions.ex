@@ -1,12 +1,15 @@
 defmodule CheckoutFunctions do
   @moduledoc """
-  Functions for supporting the CheckoutServer module.
+  Functions for the basic funtionalities of the application.
+
+  These funtions are used to interact with the CheckoutServer.
 
   * initializing unique cart
   * add item to cart
-  * support functions to filter and update CheckoutServer's state
+  * support functions to filter, update and remove CheckoutServer's state elements.
 
   """
+  alias alias PricingRulesCheckoutCart, as: CheckoutCart
 
   # cart() e.g. -> %{cart_id: "c0e55a1a-47dc-4a13-9149-777f7259dcd8", product_list: [], pricing_rule: :pricing_rule}
   @type cart() :: map()
@@ -21,7 +24,9 @@ defmodule CheckoutFunctions do
   # checkout_state() e.g. -> [cart(), cart(), ...]
   @type checkout_state() :: list()
   @type reason() :: String.t()
+  # these coming from product.json store_product_codes() e.g. -> [product_code(), product_code()]
   @type store_product_codes() :: map()
+  @type store_product_list() :: list()
 
   @spec generate_new_cart(pricing_rule()) :: cart() | {:error, reason()}
   def generate_new_cart(pricing_rule) do
@@ -78,5 +83,20 @@ defmodule CheckoutFunctions do
       |> Enum.reject(fn x -> x.cart_id == cart_id end)
 
     checkout_state_update
+  end
+
+  @spec get_total(cart(), store_product_list()) :: String.t()
+  def get_total(cart, store_product_list) do
+    pricing_rule = PricingRulesSets.pricing_rule_set_registry()
+
+    total_price =
+      cart
+      |> Access.get(:product_list)
+      |> CheckoutCart.summarise_product_list()
+      |> CheckoutCart.generate_checkout_cart(store_product_list)
+      |> pricing_rule[cart.pricing_rule].()
+
+    :ok = CheckoutServer.call({:delete_cart, cart.cart_id})
+    total_price
   end
 end
