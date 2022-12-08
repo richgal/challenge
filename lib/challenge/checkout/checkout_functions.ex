@@ -20,17 +20,37 @@ defmodule CheckoutFunctions do
   @type pricing_rule() :: atom()
   # checkout_state() e.g. -> [cart(), cart(), ...]
   @type checkout_state() :: list()
+  @type reason() :: String.t()
+  @type store_product_codes() :: map()
 
-  @spec generate_new_cart(pricing_rule()) :: cart_id()
+  @spec generate_new_cart(pricing_rule()) :: cart() | {:error, reason()}
   def generate_new_cart(pricing_rule) do
-    cart = %{cart_id: UUID.uuid4(), product_list: [], pricing_rule: pricing_rule}
-    cart
+    pricing_rules_reg = PricingRulesSets.pricing_rule_set_registry()
+
+    case Map.has_key?(pricing_rules_reg, pricing_rule) do
+      true ->
+        %{cart_id: UUID.uuid4(), product_list: [], pricing_rule: pricing_rule}
+
+      false ->
+        IO.puts(
+          "Pricing rule is not in the pricing rule set registry. :no_discout pricing rule set will be applied"
+        )
+
+        %{cart_id: UUID.uuid4(), product_list: [], pricing_rule: :no_discout}
+    end
   end
 
-  @spec add_product_to_cart(cart(), product_code()) :: cart()
-  def add_product_to_cart(cart, product_code) do
-    new_produt_list = [product_code | cart.product_list]
-    %{cart | product_list: new_produt_list}
+  @spec add_product_to_cart(cart(), product_code(), store_product_codes()) ::
+          cart() | {:error, reason()}
+  def add_product_to_cart(cart, product_code, store_product_codes) do
+    case Map.has_key?(store_product_codes, product_code) do
+      true ->
+        %{cart | product_list: [product_code | cart.product_list]}
+
+      false ->
+        IO.puts("Product is not in the products.json file. No product added")
+        %{cart | product_list: cart.product_list}
+    end
   end
 
   @spec get_cart_from_checkout_server_state(cart_id(), checkout_state()) :: cart()
@@ -47,6 +67,15 @@ defmodule CheckoutFunctions do
       checkout_state
       |> Enum.reject(fn x -> x.cart_id == cart_id end)
       |> List.insert_at(-1, cart)
+
+    checkout_state_update
+  end
+
+  @spec update_checkout_server_state(cart(), checkout_state()) :: checkout_state()
+  def remove_cart_from_checkout_server_state(cart_id, checkout_state) do
+    checkout_state_update =
+      checkout_state
+      |> Enum.reject(fn x -> x.cart_id == cart_id end)
 
     checkout_state_update
   end
