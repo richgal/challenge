@@ -2,10 +2,10 @@ defmodule PricingRulesCheckoutCart do
   @moduledoc """
   PricingRulesCheckoutCart module supports the generation and modification of checkout_cart() lists.
 
-  checkout_cart() maps are summarised and extended representation of a unique cart's product_list()
+  checkout_cart() list is summarised and extended representation of a unique cart's product_list()
 
   all pricing rule functions in the PricingRules module use checkout_cart() as their first argument
-  also returns modified checkout_cart() lists.
+  and returns modified checkout_cart() lists.
   """
 
   # cart() e.g. -> %{cart_id: "c0e55a1a-47dc-4a13-9149-777f7259dcd8", product_list: [], pricing_rule: :pricing_rule}
