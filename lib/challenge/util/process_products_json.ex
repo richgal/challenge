@@ -2,30 +2,16 @@ defmodule ProcessProductsJson do
   @moduledoc """
   This module is created to open, process and make available the products.json file's content for the rest of the application.
   """
-  @typedoc """
-   path e.g. -> "./"
-  """
+
+  # path e.g. -> "./"
   @type path() :: String.t()
-  @typedoc """
-   filename e.g. -> "products.json"
-  """
+  # path e.g. -> filename e.g. -> "products.json"
   @type filename() :: String.t()
-  @typedoc """
-   product_attribute_raw e.g. -> %{"Code" => "MUG", "Name" => "Coffee Mug", "Price" => "7.50€"}
-  """
+  # product_attribute_raw e.g. -> %{"Code" => "MUG", "Name" => "Coffee Mug", "Price" => "7.50€"}
   @type product_attribute_raw() :: map()
-  @typedoc """
-   product_attribute e.g. -> %{"Code" => "MUG", "Name" => "Coffee Mug", "Price" => 7.5, "ccy" => "€"}
-  """
+  # product_attribute e.g. -> %{"Code" => "MUG", "Name" => "Coffee Mug", "Price" => 7.5, "ccy" => "€"}
   @type product_attribute() :: map()
-  @typedoc """
-   product_list_raw e.g. ->
-    [
-      %{"Code" => "VOUCHER", "Name" => "Voucher", "Price" => "5.00€"},
-      %{"Code" => "TSHIRT", "Name" => "T-Shirt", "Price" => "20.00€"},
-      %{"Code" => "MUG", "Name" => "Coffee Mug", "Price" => "7.50€"}
-    ]
-  """
+  # product_list_raw e.g. -> [%{"Code" => "VOUCHER", "Name" => "Voucher", "Price" => "5.00€"}, %{"Code" => "TSHIRT", "Name" => "T-Shirt", "Price" => "20.00€"}]
   @type product_list_raw() :: nonempty_list()
   @typedoc """
    Product list where the currency units and prices are separate keys.
@@ -37,9 +23,7 @@ defmodule ProcessProductsJson do
     ]
   """
   @type product_list() :: nonempty_list()
-  @typedoc """
-   reason e.g. -> :file_not_exist
-  """
+  # reason e.g. -> :file_not_exist
   @type reason() :: atom() | String.t()
 
   @spec json_to_list(path(), filename()) :: product_list_raw() | {:error, reason()}

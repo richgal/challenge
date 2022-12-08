@@ -5,7 +5,7 @@ defmodule PricingRules do
 
   With the help of unique pricing rules it is possible to implement conventional or exotic pricing rule funtions.
 
-  Each pricing rule's first input must be a checkout_cart() list and should return an updated checkout_cart list.
+  Each pricing rule's first argument must be a checkout_cart() list and should return an updated checkout_cart() list.
   """
   alias ProcessProductsJson
   alias PricingRulesCheckoutCart, as: CheckoutCart

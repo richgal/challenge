@@ -5,11 +5,11 @@ defmodule PricingRulesSets do
 
   The individual price rules can be set in the PricingRules module.
 
-  The price rule sets should be developed considering individual cart element as the argument.
+  The price rule sets should be developed considering checkout_cart() as the argument.
 
   Every pricing rule set must end with the invoke of calculate_total/1 funtion as the last element of the price rule set pipeline
 
-  Every pricing rule set must be registered by adding the function to the pricint_rule_set_registry
+  Every pricing rule set must be registered by adding the function to the pricint_rule_set_registry/0
 
   """
 
