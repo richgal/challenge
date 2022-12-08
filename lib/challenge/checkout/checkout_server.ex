@@ -41,8 +41,8 @@ defmodule CheckoutServer do
   end
 
   def handle_call({:delete_cart, cart_id}, _from, state) do
-    CheckoutFunctions.remove_cart_from_checkout_server_state(cart_id, state)
-    {:reply, :ok, state}
+    new_state = CheckoutFunctions.remove_cart_from_checkout_server_state(cart_id, state)
+    {:reply, :ok, new_state}
   end
 
   @impl true
