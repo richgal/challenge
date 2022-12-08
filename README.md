@@ -7,7 +7,7 @@
 Start with iex for development purposes
 
 ```bash
-git@github.com:richgal/challenge.git challenge
+git clone https://github.com/richgal/challenge.git
 cd challenge
 mix deps.get
 iex -S mix
@@ -16,7 +16,7 @@ iex -S mix
 Start as release
 
 ```bash
-git@github.com:richgal/challenge.git challenge
+git clone https://github.com/richgal/challenge.git
 cd challenge
 mix deps.get --only prod
 MIX_ENV=prod mix release
@@ -30,15 +30,15 @@ _build/prod/rel/challenge/bin/challenge stop
 ## Demo
 
 ```bash
-co = Checkout.new(:pricing_rule)
+iex(1)> co = Checkout.new(:pricing_rule)
 "a95ae504-2a0a-4ae6-ba78-b051f07683d6" # the id will be unique
-Checkout.scan(co, "TSHIRT")
+iex(2)> Checkout.scan(co, "TSHIRT")
 :ok
-Checkout.scan(co, "MUG")
+iex(3)> Checkout.scan(co, "MUG")
 :ok
-Checkout.scan(co, "VOUCHER")
+iex(4)> Checkout.scan(co, "VOUCHER")
 :ok
-Checkout.total(co)
+iex(5)> Checkout.total(co)
 "32.50€"
 ```
 
