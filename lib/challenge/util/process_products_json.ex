@@ -28,7 +28,7 @@ defmodule ProcessProductsJson do
   """
   @type product_list_raw() :: nonempty_list()
   @typedoc """
-   Product list where the currency units and prices are separate keys. 
+   Product list where the currency units and prices are separate keys.
    product_list e.g. ->
     [
       %{"Code" => "VOUCHER", "Name" => "Voucher", "Price" => 5.0, "ccy" => "€"},
@@ -42,9 +42,6 @@ defmodule ProcessProductsJson do
   """
   @type reason() :: atom() | String.t()
 
-  @doc """
-  Opens a json file and decode the json format to elixir map format.
-  """
   @spec json_to_list(path(), filename()) :: product_list_raw() | {:error, reason()}
   def json_to_list(path, filename) do
     file_path = path <> filename
@@ -59,9 +56,6 @@ defmodule ProcessProductsJson do
     end
   end
 
-  @doc """
-  Separates the currency symbol from the raw product attribute's price key to a new map.
-  """
   @spec separate_currency(product_attribute_raw()) :: product_attribute()
   def separate_currency(product_attribute_raw) do
     {price, currency} = Float.parse(product_attribute_raw["Price"])
@@ -70,19 +64,12 @@ defmodule ProcessProductsJson do
     product_attribute
   end
 
-  @doc """
-  Iterates trough the product list to reformat the list elements maps with prices and currencies
-  with the use of separate_currency function.
-  """
   @spec separate_currency_on_product_list(product_list_raw()) :: nonempty_list()
   def separate_currency_on_product_list(product_list_raw) do
     product_list = Enum.map(product_list_raw, fn x -> separate_currency(x) end)
     product_list
   end
 
-  @doc """
-  Generates formatted product list
-  """
   @spec get_product_list(path(), filename()) :: product_list()
   def get_product_list(path, filename) do
     product_list =
@@ -90,5 +77,11 @@ defmodule ProcessProductsJson do
       |> separate_currency_on_product_list()
 
     product_list
+  end
+
+  def get_product_codes(path, filename) do
+    product_list = get_product_list(path, filename)
+    product_codes = Enum.frequencies(Enum.map(product_list, fn x -> x["Code"] end))
+    product_codes
   end
 end
