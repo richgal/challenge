@@ -1,16 +1,24 @@
 defmodule Checkout do
   @moduledoc """
-  Interface to interact with the CheckoutServer
+  Interface to interact with the application.
   """
   alias CheckoutFunctions
-  alias PricingRulesCheckoutCart, as: CheckoutCart
 
+  # pricing_rule() e.g. -> :pricing_rule
+  @type pricing_rule() :: atom()
+  # cart_id() e.g. -> "c0e55a1a-47dc-4a13-9149-777f7259dcd8"
+  @type cart_id() :: String.t()
+  # product_code() e.g. -> "TSHIRT"
+  @type product_code() :: String.t()
+
+  @spec new(pricing_rule()) :: cart_id()
   def new(pricing_rule) do
     cart = CheckoutFunctions.generate_new_cart(pricing_rule)
     cart_id = CheckoutServer.call({:new_cart, cart})
     cart_id
   end
 
+  @spec scan(cart_id(), product_code()) :: cart_id()
   def scan(cart_id, product_code) do
     store_product_codes = ProcessProductsJson.get_product_codes("./", "products.json")
 
@@ -21,19 +29,17 @@ defmodule Checkout do
     CheckoutServer.call({:update_checkout_state, cart_update})
   end
 
+  @spec total(cart_id()) :: String.t()
   def total(cart_id) do
     store_product_list = ProcessProductsJson.get_product_list("./", "products.json")
     cart = CheckoutServer.call({:get_cart, cart_id})
-    pricing_rule = PricingRulesSets.pricing_rule_set_registry()
 
-    total_price =
-      cart
-      |> Access.get(:product_list)
-      |> CheckoutCart.summarise_product_list()
-      |> CheckoutCart.generate_checkout_cart(store_product_list)
-      |> pricing_rule[cart.pricing_rule].()
+    case cart do
+      nil ->
+        IO.puts("Cart does not exist, start a new cart process with Checkout.new(:pricing_rule)")
 
-    CheckoutServer.call({:delete_cart, cart_id})
-    total_price
+      _ ->
+        CheckoutFunctions.get_total(cart, store_product_list)
+    end
   end
 end
