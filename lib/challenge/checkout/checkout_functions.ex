@@ -1,64 +1,46 @@
 defmodule CheckoutFunctions do
   @moduledoc """
-  Functions for supporting the Checkout module.
+  Functions for supporting the CheckoutServer module.
 
   * initializing unique cart
-  * manage item additions
+  * add item to cart
+  * support functions to filter and update CheckoutServer's state
 
   """
 
-  @typedoc """
-   cart e.g. -> %{cart_id: "c0e55a1a-47dc-4a13-9149-777f7259dcd8", product_list: []}
-  """
+  # cart() e.g. -> %{cart_id: "c0e55a1a-47dc-4a13-9149-777f7259dcd8", product_list: [], pricing_rule: :pricing_rule}
   @type cart() :: map()
-  @typedoc """
-   cart_summary e.g. -> %{"Bar" => 2, "Foo" => 3}
-  """
-  @type cart_summary() :: map()
-  @typedoc """
-   product_code e.g. -> "TSHIRT"
-  """
+  # product_code() e.g. -> "TSHIRT"
   @type product_code() :: String.t()
+  # cart_id() e.g. -> "c0e55a1a-47dc-4a13-9149-777f7259dcd8"
   @type cart_id() :: String.t()
-  @typedoc """
-   subtotal e.g. -> %{"Bar" => 2, "Foo" => 3, "Subtotal" => 0}
-  """
-  @type subtotal() :: map()
-  @typedoc """
-   This list refers to the processed json elements.
-
-   store_product_list e.g. ->
-    [
-      %{"Code" => "VOUCHER", "Name" => "Voucher", "Price" => 5.0, "ccy" => "€"},
-      %{"Code" => "TSHIRT", "Name" => "T-Shirt", "Price" => 20.0, "ccy" => "€"},
-      %{"Code" => "MUG", "Name" => "Coffee Mug", "Price" => 7.5, "ccy" => "€"}
-    ]
-  """
-  @type checkout_cart() :: list()
-  @type store_product_list() :: nonempty_list()
+  # product_list() e.g. -> [product_code(), product_code()]
   @type product_list() :: list()
-  @type product_list_summary() :: map()
+  # pricing_rule() e.g. -> :pricing_rule
   @type pricing_rule() :: atom()
+  # checkout_state() e.g. -> [cart(), cart(), ...]
+  @type checkout_state() :: list()
 
   @spec generate_new_cart(pricing_rule()) :: cart_id()
   def generate_new_cart(pricing_rule) do
     cart = %{cart_id: UUID.uuid4(), product_list: [], pricing_rule: pricing_rule}
-    cart_id = Checkout.call({:new_cart, cart})
-    cart_id
+    cart
   end
 
-  @spec add_product_to_cart(cart(), product_code()) :: :ok
+  @spec add_product_to_cart(cart(), product_code()) :: cart()
   def add_product_to_cart(cart, product_code) do
     new_produt_list = [product_code | cart.product_list]
-    Checkout.call({:update_checkout_state, %{cart | product_list: new_produt_list}})
+    %{cart | product_list: new_produt_list}
   end
 
-  def get_cart_from_checkout_state(cart_id, checkout_state) do
+  @spec get_cart_from_checkout_server_state(cart_id(), checkout_state()) :: cart()
+  def get_cart_from_checkout_server_state(cart_id, checkout_state) do
     cart = Enum.find(checkout_state, fn x -> x.cart_id == cart_id end)
     cart
   end
 
-  def update_checkout_state(cart, checkout_state) do
+  @spec update_checkout_server_state(cart(), checkout_state()) :: checkout_state()
+  def update_checkout_server_state(cart, checkout_state) do
     cart_id = cart.cart_id
 
     checkout_state_update =
@@ -67,74 +49,5 @@ defmodule CheckoutFunctions do
       |> List.insert_at(-1, cart)
 
     checkout_state_update
-  end
-
-  @spec summarise_product_list(product_list()) :: product_list_summary()
-  def summarise_product_list(product_list) do
-    product_list_summary = Enum.frequencies(product_list)
-    product_list_summary
-  end
-
-  @spec generate_checkout_cart(product_list_summary(), store_product_list()) :: checkout_cart()
-  def generate_checkout_cart(product_list_summary, store_product_list) do
-    checkout_cart =
-      Map.keys(product_list_summary)
-      |> Enum.map(fn x ->
-        generate_checkout_cart_element(x, product_list_summary, store_product_list)
-      end)
-
-    checkout_cart
-  end
-
-  @spec generate_checkout_cart_element(
-          product_code(),
-          product_list_summary(),
-          store_product_list()
-        ) :: map()
-  def generate_checkout_cart_element(product_code, product_list_summary, store_product_list) do
-    cart_element =
-      Enum.find(store_product_list, fn x -> x["Code"] == product_code end)
-      |> Map.put("Quantity", product_list_summary[product_code])
-
-    cart_element
-  end
-
-  def update_checkout_cart(checkout_cart, cart_element) when is_map(cart_element) do
-    product_code = cart_element["Code"]
-
-    checkout_cart_update =
-      checkout_cart
-      |> Enum.reject(fn x -> x["Code"] == product_code end)
-      |> List.insert_at(-1, cart_element)
-
-    checkout_cart_update
-  end
-
-  def update_checkout_cart(checkout_cart, cart_element) when is_list(cart_element) do
-    product_code = hd(cart_element)["Code"]
-
-    checkout_cart_update =
-      checkout_cart
-      |> Enum.reject(fn x -> x["Code"] == product_code end)
-      |> Kernel.++(cart_element)
-
-    checkout_cart_update
-  end
-
-  def get_checkout_cart_element_attributes(checkout_cart, product_code) do
-    cart_element = Enum.find(checkout_cart, fn x -> x["Code"] == product_code end)
-
-    case cart_element do
-      nil ->
-        {"not_in_cart", "not_in_cart", 0, 0, nil}
-
-      _ ->
-        {cart_element["Code"], cart_element["Name"], cart_element["Price"],
-         cart_element["Quantity"], cart_element["ccy"]}
-    end
-  end
-
-  def get_checkout_cart_element(checkout_cart, product_code) do
-    Enum.find(checkout_cart, fn x -> x["Code"] == product_code end)
   end
 end
