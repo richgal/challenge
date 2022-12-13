@@ -40,8 +40,16 @@ defmodule PricingRulesSets do
   end
 
   # calculate total must be the final invoked funcion in unique pricing rule funtions
-
   def calculate_total(checkout_cart, ccy) do
+    total =
+      checkout_cart
+      |> Enum.map(fn x -> x["Quantity"] * x["Price"] end)
+      |> Enum.reduce(fn x, acc -> x + acc end)
+
+    "#{:erlang.float_to_binary(total, decimals: 2)}#{ccy}"
+  end
+
+  def calculate_total_table(checkout_cart, ccy) do
     total =
       checkout_cart
       |> Enum.map(fn x -> x["Quantity"] * x["Price"] end)
