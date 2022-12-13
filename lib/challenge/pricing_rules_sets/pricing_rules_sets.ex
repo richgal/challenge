@@ -47,6 +47,13 @@ defmodule PricingRulesSets do
       |> Enum.map(fn x -> x["Quantity"] * x["Price"] end)
       |> Enum.reduce(fn x, acc -> x + acc end)
 
-    "#{:erlang.float_to_binary(total, decimals: 2)}#{ccy}"
+    header = "Product    Qty   Price"
+
+    cart_strings =
+      Enum.map(checkout_cart, fn x -> "#{x["Name"]}    #{x["Quantity"]}   #{x["Price"] * x["Quantity"]}" end)
+      |> Enum.join("\n")
+
+    total = "Total: #{:erlang.float_to_binary(total, decimals: 2)} #{ccy}"
+    IO.puts(Enum.join([header, cart_strings, total], "\n"))
   end
 end
